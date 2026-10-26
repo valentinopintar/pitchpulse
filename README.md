@@ -25,12 +25,14 @@ Live synthetic events
   → dual UI tabs: Fan (insights + pitch) | Coach (analytics + pitch)
 ```
 
-| Stage | Coach tab | Fan tab |
-| --- | --- | --- |
-| Ingest / Interpret | Live event stream + rolling metrics | First-half rollups for HT cards |
-| Explain | Why the leak matters now | Casual verdicts (cold start, flank, crowd call) |
-| Render | Alert rail + pitch zones | Storyline cards + pitch pressure map |
-| Personalize | Live bench tools + agent | Halftime summary (separate tab in demo) |
+
+| Stage              | Coach tab                           | Fan tab                                         |
+| ------------------ | ----------------------------------- | ----------------------------------------------- |
+| Ingest / Interpret | Live event stream + rolling metrics | First-half rollups for HT cards                 |
+| Explain            | Why the leak matters now            | Casual verdicts (cold start, flank, crowd call) |
+| Render             | Alert rail + pitch zones            | Storyline cards + pitch pressure map            |
+| Personalize        | Live bench tools + agent            | Halftime summary (separate tab in demo)         |
+
 
 ---
 
@@ -39,7 +41,7 @@ Live synthetic events
 **Needs:** Python ≥ 3.11, Node ≥ 18 (conda optional).
 
 ```bash
-git clone https://bitbucket.org/piworkspace/pitchpulse.git
+git clone https://github.com/valentinopintar/pitchpulse.git
 cd pitchpulse
 
 # Python env
@@ -58,7 +60,7 @@ PORT=8011 python -m pitchpulse.api.main
 cd web && npm install && npm run dev
 ```
 
-Open **http://localhost:5173**
+Open **[http://localhost:5173](http://localhost:5173)**
 
 - First visit: About modal → optional Tour. Click panels for short explanations.
 - **Fan** tab = halftime summary + pitch · **Coach** tab = live analytics + pitch.
