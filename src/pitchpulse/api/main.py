@@ -47,8 +47,8 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="PitchPulse AI", version="0.1.0", lifespan=lifespan)
-app.add_middleware(
+api_app = FastAPI(title="PitchPulse AI", version="0.1.0", lifespan=lifespan)
+api_app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -57,7 +57,7 @@ app.add_middleware(
 )
 
 
-@app.get("/health")
+@api_app.get("/health")
 def health() -> dict[str, Any]:
     return {
         "status": "ok",
@@ -66,12 +66,12 @@ def health() -> dict[str, Any]:
     }
 
 
-@app.get("/replay/status")
+@api_app.get("/replay/status")
 def replay_status() -> dict[str, Any]:
     return _status_dict(SESSION.status())
 
 
-@app.post("/replay/load")
+@api_app.post("/replay/load")
 def replay_load(body: dict[str, Any]) -> dict[str, Any]:
     match_id = body.get("match_id", "syn-001")
     if not (match_dir(match_id) / "events.jsonl").exists():
@@ -84,7 +84,7 @@ def replay_load(body: dict[str, Any]) -> dict[str, Any]:
     return _status_dict(st)
 
 
-@app.post("/replay/start")
+@api_app.post("/replay/start")
 def replay_start(body: dict[str, Any] | None = None) -> dict[str, Any]:
     body = body or {}
     speed = float(body.get("speed", 0.0))
@@ -95,18 +95,18 @@ def replay_start(body: dict[str, Any] | None = None) -> dict[str, Any]:
     return _status_dict(st)
 
 
-@app.post("/replay/pause")
+@api_app.post("/replay/pause")
 def replay_pause() -> dict[str, Any]:
     return _status_dict(SESSION.pause())
 
 
-@app.post("/replay/speed")
+@api_app.post("/replay/speed")
 def replay_speed(body: dict[str, Any]) -> dict[str, Any]:
     speed = float(body.get("speed", 0.0))
     return _status_dict(SESSION.set_speed(speed))
 
 
-@app.post("/replay/seek")
+@api_app.post("/replay/seek")
 def replay_seek(body: dict[str, Any]) -> dict[str, Any]:
     if "t_ms" not in body:
         raise HTTPException(status_code=400, detail="t_ms required")
@@ -117,18 +117,18 @@ def replay_seek(body: dict[str, Any]) -> dict[str, Any]:
     return _status_dict(st)
 
 
-@app.get("/viewer")
+@api_app.get("/viewer")
 def get_viewer() -> dict[str, Any]:
     return STUDIO.viewer.to_dict()
 
 
-@app.post("/viewer")
+@api_app.post("/viewer")
 def set_viewer(body: dict[str, Any]) -> dict[str, Any]:
     STUDIO.viewer = ViewerProfile.from_dict(body)
     return STUDIO.viewer.to_dict()
 
 
-@app.post("/explain/alert")
+@api_app.post("/explain/alert")
 def explain_alert(body: dict[str, Any]) -> dict[str, Any]:
     alert_id = body.get("alert_id")
     if not alert_id:
@@ -159,14 +159,14 @@ def explain_alert(body: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-@app.get("/substitutions")
+@api_app.get("/substitutions")
 def list_substitutions() -> dict[str, Any]:
     if not STUDIO.match_id:
         raise HTTPException(status_code=400, detail="Load a match first")
     return {"match_id": STUDIO.match_id, "moments": STUDIO.substitutions()}
 
 
-@app.get("/substitutions/{moment_id}")
+@api_app.get("/substitutions/{moment_id}")
 def get_substitution(moment_id: str) -> dict[str, Any]:
     moment = STUDIO.substitution(moment_id)
     if not moment:
@@ -180,17 +180,17 @@ def get_substitution(moment_id: str) -> dict[str, Any]:
     }
 
 
-@app.get("/shortlist/{alert_id}")
+@api_app.get("/shortlist/{alert_id}")
 def shortlist_for_alert(alert_id: str, team_side: str | None = None) -> dict[str, Any]:
     return propose_roles_for_alert(alert_id, team_side=team_side, bench_only=True, limit=3)
 
 
-@app.get("/agent/tools")
+@api_app.get("/agent/tools")
 def list_agent_tools() -> dict[str, Any]:
     return {"tools": agent_tools.TOOL_SPECS}
 
 
-@app.post("/agent/chat")
+@api_app.post("/agent/chat")
 def chat_with_agent(body: dict[str, Any]) -> dict[str, Any]:
     message = (body.get("message") or "").strip()
     if not message:
@@ -198,7 +198,7 @@ def chat_with_agent(body: dict[str, Any]) -> dict[str, Any]:
     return agent_chat(message)
 
 
-@app.get("/fan/live")
+@api_app.get("/fan/live")
 def fan_live_pitch(minute: float = 0.0) -> dict[str, Any]:
     """Live fan pitch: cumulative player stats + problems active at match minute."""
     match_id = STUDIO.match_id or "syn-001"
@@ -211,7 +211,7 @@ def fan_live_pitch(minute: float = 0.0) -> dict[str, Any]:
     return build_fan_live(match_id, live_minute)
 
 
-@app.get("/fan/halftime")
+@api_app.get("/fan/halftime")
 def fan_halftime_summary() -> dict[str, Any]:
     """Living-room Match Day Summary — no live coaching feed."""
     match_id = STUDIO.match_id or "syn-001"
@@ -238,7 +238,7 @@ def fan_halftime_summary() -> dict[str, Any]:
     }
 
 
-@app.get("/recap")
+@api_app.get("/recap")
 def match_recap() -> dict[str, Any]:
     if not STUDIO.match_id:
         raise HTTPException(status_code=400, detail="Load a match first")
@@ -327,7 +327,7 @@ async def _sse_generator():
     yield f"data: {json.dumps({'type': 'stream_end'})}\n\n"
 
 
-@app.get("/replay/stream")
+@api_app.get("/replay/stream")
 async def replay_stream(speed: float = 120.0, autostart: bool = True) -> StreamingResponse:
     if not SESSION.status().loaded:
         raise HTTPException(status_code=400, detail="Load a match first: POST /replay/load")
@@ -343,6 +343,41 @@ async def replay_stream(speed: float = 120.0, autostart: bool = True) -> Streami
             "X-Accel-Buffering": "no",
         },
     )
+
+
+def _static_dir():
+    """Return web/dist when present (Docker / single-port demo)."""
+    import os
+    from pathlib import Path
+
+    env = os.environ.get("PITCHPULSE_STATIC", "").strip()
+    candidates = []
+    if env:
+        candidates.append(Path(env))
+    # src/pitchpulse/api/main.py → repo root
+    candidates.append(Path(__file__).resolve().parents[3] / "web" / "dist")
+    candidates.append(Path("/app/web/dist"))
+    for path in candidates:
+        if path.is_dir() and (path / "index.html").is_file():
+            return path
+    return None
+
+
+def _build_app() -> FastAPI:
+    """API-only in local/dev; API under /api + SPA at / when web/dist exists."""
+    static = _static_dir()
+    if static is None:
+        return api_app
+
+    from fastapi.staticfiles import StaticFiles
+
+    root = FastAPI(title="PitchPulse AI", version="0.1.0")
+    root.mount("/api", api_app)
+    root.mount("/", StaticFiles(directory=str(static), html=True), name="ui")
+    return root
+
+
+app = _build_app()
 
 
 def main() -> None:

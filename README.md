@@ -82,6 +82,22 @@ More detail: [DATASET](docs/DATASET.md) · [INTERPRET](docs/INTERPRET.md) · [AP
 
 ---
 
+## Docker (single URL)
+
+Builds the Vite UI and serves it from FastAPI: **UI `/`**, **API `/api`**, port **7860** (Hugging Face Spaces default).
+
+```bash
+docker build -t pitchpulse .
+docker run --rm -p 7860:7860 pitchpulse
+# open http://localhost:7860  → Load & run syn-001
+```
+
+**Hugging Face Spaces:** New Space → SDK **Docker** → link this GitHub repo (or push the Dockerfile). Public URL will look like `https://<user>-pitchpulse.hf.space`.
+
+Local `PORT=8011` + `npm run dev` is unchanged when `web/dist` is absent (API stays at `/`).
+
+---
+
 ## License
 
 MIT (intended for public hackathon submission).
