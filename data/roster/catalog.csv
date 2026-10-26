@@ -1,0 +1,17 @@
+player_id,name,position,team_side,on_bench,aerial,cross_defend,defensive_duels,press_resistance,progressive_pass,pace,finishing,delivery,style_tags
+A12,J. Mercer,LB,away,1,0.82,0.88,0.71,0.55,0.48,0.62,0.35,0.42,aerial;cross_defend
+A13,K. Voss,CDM,away,1,0.58,0.52,0.76,0.91,0.74,0.58,0.40,0.55,press_shield;tempo
+A14,R. Hale,CB,away,1,0.86,0.70,0.84,0.60,0.40,0.55,0.30,0.35,duel_winner;aerial
+A15,S. Quinn,WB,away,1,0.70,0.80,0.65,0.58,0.62,0.78,0.42,0.72,width;cross_defend
+A16,T. Nassar,ST,away,1,0.62,0.35,0.40,0.55,0.58,0.80,0.92,0.60,clinical;poacher
+A17,L. Ortega,RW,away,1,0.40,0.38,0.35,0.60,0.78,0.86,0.58,0.90,delivery;width
+A18,M. Keane,CAM,away,1,0.45,0.40,0.48,0.82,0.91,0.70,0.68,0.75,progressive;creator
+H12,A. Pierce,RW,home,1,0.45,0.40,0.35,0.62,0.80,0.88,0.55,0.84,pace;width
+H13,M. Trent,CDM,home,1,0.52,0.48,0.70,0.85,0.72,0.60,0.38,0.50,press_shield
+H14,C. Vega,ST,home,1,0.58,0.32,0.38,0.52,0.55,0.82,0.88,0.55,clinical;pace
+A03,O. Lane,LB,away,0,0.41,0.38,0.52,0.48,0.55,0.71,0.30,0.40,overmatched_wide
+A06,F. Doyle,CDM,away,0,0.50,0.45,0.68,0.54,0.61,0.60,0.35,0.48,turnover_risk
+A05,I. Mendes,CB,away,0,0.55,0.50,0.58,0.52,0.42,0.65,0.28,0.32,low_contact_rate
+A08,Z. Harper,CAM,away,0,0.42,0.38,0.45,0.58,0.52,0.68,0.55,0.58,link_stall
+H09,E. Santos,RW,home,0,0.48,0.42,0.40,0.65,0.83,0.86,0.50,0.55,progressive;width
+H10,C. Lowe,ST,home,0,0.55,0.30,0.35,0.50,0.52,0.78,0.42,0.48,wasteful;volume

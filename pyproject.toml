@@ -1,0 +1,34 @@
+[project]
+name = "pitchpulse-ai"
+version = "0.1.0"
+description = "Synthetic match intelligence for studio coaching alerts and fan explainers"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+api = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.4",
+]
+
+[project.scripts]
+pitchpulse-generate = "pitchpulse.data.generate_match:main"
+pitchpulse-api = "pitchpulse.api.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

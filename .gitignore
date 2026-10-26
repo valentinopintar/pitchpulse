@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+web/dist/
+web/.vite/
+.DS_Store
+*.log
+
+# Regenerated match bundles (keep syn-001 in repo for demo — comment out if you prefer git-only authored beats)
+# data/matches/*/events.jsonl

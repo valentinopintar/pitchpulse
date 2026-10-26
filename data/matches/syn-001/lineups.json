@@ -1,0 +1,151 @@
+{
+  "home": {
+    "team_id": "home",
+    "starters": [
+      {
+        "id": "H01",
+        "name": "K. Marsh",
+        "position": "GK"
+      },
+      {
+        "id": "H02",
+        "name": "L. Cole",
+        "position": "RB"
+      },
+      {
+        "id": "H03",
+        "name": "P. Ndiaye",
+        "position": "CB"
+      },
+      {
+        "id": "H04",
+        "name": "S. Wright",
+        "position": "CB"
+      },
+      {
+        "id": "H05",
+        "name": "M. Silva",
+        "position": "LB"
+      },
+      {
+        "id": "H06",
+        "name": "J. Okoro",
+        "position": "CM"
+      },
+      {
+        "id": "H07",
+        "name": "R. Finn",
+        "position": "CM"
+      },
+      {
+        "id": "H08",
+        "name": "T. Berg",
+        "position": "CM"
+      },
+      {
+        "id": "H09",
+        "name": "E. Santos",
+        "position": "RW"
+      },
+      {
+        "id": "H10",
+        "name": "C. Lowe",
+        "position": "ST"
+      },
+      {
+        "id": "H11",
+        "name": "D. Kim",
+        "position": "LW"
+      }
+    ],
+    "midfielders": [
+      "H06",
+      "H07",
+      "H08"
+    ],
+    "bench": [
+      {
+        "id": "H12",
+        "name": "A. Pierce",
+        "position": "RW"
+      }
+    ]
+  },
+  "away": {
+    "team_id": "away",
+    "starters": [
+      {
+        "id": "A01",
+        "name": "G. Holt",
+        "position": "GK"
+      },
+      {
+        "id": "A02",
+        "name": "N. Fraser",
+        "position": "RB"
+      },
+      {
+        "id": "A03",
+        "name": "O. Lane",
+        "position": "LB"
+      },
+      {
+        "id": "A04",
+        "name": "V. Kostov",
+        "position": "CB"
+      },
+      {
+        "id": "A05",
+        "name": "I. Mendes",
+        "position": "CB"
+      },
+      {
+        "id": "A06",
+        "name": "F. Doyle",
+        "position": "CDM"
+      },
+      {
+        "id": "A07",
+        "name": "Y. Petrov",
+        "position": "CM"
+      },
+      {
+        "id": "A08",
+        "name": "Z. Harper",
+        "position": "CAM"
+      },
+      {
+        "id": "A09",
+        "name": "Q. Ellis",
+        "position": "RW"
+      },
+      {
+        "id": "A10",
+        "name": "B. Okafor",
+        "position": "ST"
+      },
+      {
+        "id": "A11",
+        "name": "W. Tate",
+        "position": "LW"
+      }
+    ],
+    "midfielders": [
+      "A06",
+      "A07",
+      "A08"
+    ],
+    "bench": [
+      {
+        "id": "A12",
+        "name": "J. Mercer",
+        "position": "LB"
+      },
+      {
+        "id": "A13",
+        "name": "K. Voss",
+        "position": "CDM"
+      }
+    ]
+  }
+}

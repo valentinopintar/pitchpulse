@@ -1,0 +1,238 @@
+match_id: syn-001
+
+meta:
+  home_team: Northbridge FC
+  away_team: Riverdale United
+  home_formation: "4-3-3"
+  away_formation: "4-2-3-1"
+  venue: Synthetic Park
+  final_score: "2-1"
+  competition: PitchPulse Synthetic Premier
+
+lineups:
+  home:
+    team_id: home
+    starters:
+      - { id: H01, name: "K. Marsh", position: GK }
+      - { id: H02, name: "L. Cole", position: RB }
+      - { id: H03, name: "P. Ndiaye", position: CB }
+      - { id: H04, name: "S. Wright", position: CB }
+      - { id: H05, name: "M. Silva", position: LB }
+      - { id: H06, name: "J. Okoro", position: CM }
+      - { id: H07, name: "R. Finn", position: CM }
+      - { id: H08, name: "T. Berg", position: CM }
+      - { id: H09, name: "E. Santos", position: RW }
+      - { id: H10, name: "C. Lowe", position: ST }
+      - { id: H11, name: "D. Kim", position: LW }
+    midfielders: [H06, H07, H08]
+    bench:
+      - { id: H12, name: "A. Pierce", position: RW }
+  away:
+    team_id: away
+    starters:
+      - { id: A01, name: "G. Holt", position: GK }
+      - { id: A02, name: "N. Fraser", position: RB }
+      - { id: A03, name: "O. Lane", position: LB }
+      - { id: A04, name: "V. Kostov", position: CB }
+      - { id: A05, name: "I. Mendes", position: CB }
+      - { id: A06, name: "F. Doyle", position: CDM }
+      - { id: A07, name: "Y. Petrov", position: CM }
+      - { id: A08, name: "Z. Harper", position: CAM }
+      - { id: A09, name: "Q. Ellis", position: RW }
+      - { id: A10, name: "B. Okafor", position: ST }
+      - { id: A11, name: "W. Tate", position: LW }
+    midfielders: [A06, A07, A08]
+    bench:
+      - { id: A12, name: "J. Mercer", position: LB }
+      - { id: A13, name: "K. Voss", position: CDM }
+
+beats:
+  - kind: flank_overload_right
+    period: 1
+    minute_start: 12
+    minute_end: 18
+    actors:
+      attacking_team: home
+      crossing_player: H09
+      exposed_defender: A03
+      dominant_attacker: H09
+
+  - kind: unproductive_crosses
+    period: 1
+    minute_start: 19
+    minute_end: 25
+    actors:
+      team: home
+      crossing_player: H09
+
+  - kind: midfield_chaos
+    period: 1
+    minute_start: 28
+    minute_end: 34
+    actors:
+      pressing_team: home
+      exposed_mid: A06
+      presser: H08
+
+  - kind: wasteful_finishing
+    period: 1
+    minute_start: 36
+    minute_end: 43
+    actors:
+      team: home
+      shooter: H10
+
+  - kind: midfield_link_break
+    period: 2
+    minute_start: 46
+    minute_end: 52
+    actors:
+      team: away
+      passer: A08
+
+  - kind: shot_speed_spike
+    period: 2
+    minute_start: 53
+    minute_end: 58
+    actors:
+      team: home
+      shooter: H10
+
+  - kind: low_defensive_contacts
+    period: 2
+    minute_start: 63
+    minute_end: 70
+    actors:
+      defending_team: away
+      weak_cb: A05
+      attacker: H11
+
+  - kind: flank_overload_right
+    period: 2
+    minute_start: 60
+    minute_end: 64
+    actors:
+      attacking_team: home
+      crossing_player: H09
+      exposed_defender: A03
+      dominant_attacker: H09
+
+  - kind: midfield_chaos
+    period: 2
+    minute_start: 68
+    minute_end: 71
+    actors:
+      pressing_team: home
+      exposed_mid: A06
+      presser: H08
+
+  - kind: player_focus
+    period: 2
+    minute_start: 78
+    minute_end: 84
+    actors:
+      team: home
+      player_id: H09
+
+expected_alerts:
+  - alert_id: flank_overload_right
+    period: 1
+    minute_start: 12
+    minute_peak: 15
+    minute_end: 18
+    storyline: right_flank
+    audience_primary: [coach, analyst]
+    leak_summary: "Home overloads the right flank with crosses and final-third entries; away LB duel loss rate climbs."
+    coach_gap: "Need aerial cross-defending full-back or tighter wide cover."
+    related_player_ids: [A03, H09]
+
+  - alert_id: unproductive_crosses
+    period: 1
+    minute_start: 19
+    minute_peak: 22
+    minute_end: 25
+    storyline: delivery
+    audience_primary: [coach, analyst, fan]
+    leak_summary: "Home wide deliveries pile up but few are productive (incomplete or not into the box)."
+    coach_gap: "Need a wide creator with higher delivery quality — or cut the source earlier."
+    related_player_ids: [H09, A12]
+
+  - alert_id: chaos_press_mid
+    period: 1
+    minute_start: 28
+    minute_peak: 31
+    minute_end: 34
+    storyline: midfield
+    audience_primary: [coach, analyst]
+    leak_summary: "Away #6 loses central duels under home press; midfield turnover cluster."
+    coach_gap: "Need press-resistant pivot or extra body between the lines."
+    related_player_ids: [A06, H08]
+
+  - alert_id: wasteful_finishing
+    period: 1
+    minute_start: 36
+    minute_peak: 40
+    minute_end: 43
+    storyline: finishing
+    audience_primary: [coach, analyst, fan]
+    leak_summary: "Home #9 racks up big chances but conversion stays low — chances created, rarely used."
+    coach_gap: "Need a clinical finisher (ST/CAM) who converts box chances."
+    related_player_ids: [H10]
+
+  - alert_id: midfield_link_break
+    period: 2
+    minute_start: 46
+    minute_peak: 49
+    minute_end: 52
+    storyline: midfield_supply
+    audience_primary: [coach, analyst]
+    leak_summary: "Away progressive passes through midfield stall; the link to attackers breaks down."
+    coach_gap: "Need a progressive CAM/CM who can complete the supply line under pressure."
+    related_player_ids: [A08]
+
+  - alert_id: shot_speed_spike
+    period: 2
+    minute_start: 53
+    minute_peak: 55
+    minute_end: 58
+    storyline: finishing
+    audience_primary: [analyst, fan]
+    leak_summary: "Home shot strike velocity spikes in the box."
+    coach_gap: "Track finishing threat and keeper positioning."
+    related_player_ids: [H10]
+
+  - alert_id: low_defensive_contacts
+    period: 2
+    minute_start: 63
+    minute_peak: 66
+    minute_end: 70
+    storyline: defensive_third
+    audience_primary: [coach, analyst]
+    leak_summary: "Entries against away back line with low successful defensive contact rate."
+    coach_gap: "Need aggressive duel-winning centre-back profile."
+    related_player_ids: [A05]
+
+substitutions:
+  - moment_id: sub_flank_fix
+    period: 2
+    minute: 65
+    team_id: away
+    player_off: A03
+    player_on: A12
+    addresses_alert_id: flank_overload_right
+    fan_window_before_ms: 300000
+    fan_window_after_ms: 600000
+    narrative_hook: "Coach reacts to the right-flank leak visible in duel and cross load."
+    observable_outcome: "Cross volume against the left side drops; away LB duel loss rate improves in the ten minutes after the change."
+
+  - moment_id: sub_mid_fix
+    period: 2
+    minute: 72
+    team_id: away
+    player_off: A06
+    player_on: A13
+    addresses_alert_id: chaos_press_mid
+    fan_window_before_ms: 240000
+    fan_window_after_ms: 600000
+    narrative_hook: "Midfield turnovers spiked before the pivot change."
+    observable_outcome: "Central turnover count falls; chaos index eases after the press-resistant sub enters."

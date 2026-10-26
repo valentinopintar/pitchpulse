@@ -1,0 +1,6 @@
+{
+  "match_id": "syn-001",
+  "event_count": 906,
+  "seed": 42,
+  "storybeat_file": "storybeats/syn-001.yaml"
+}

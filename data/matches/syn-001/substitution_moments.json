@@ -1,0 +1,50 @@
+[
+  {
+    "moment_id": "sub_flank_fix",
+    "t_sub_ms": 3900000,
+    "team_id": "away",
+    "player_off_id": "A03",
+    "player_on_id": "A12",
+    "addresses_alert_id": "flank_overload_right",
+    "fan_window_start_ms": 3600000,
+    "fan_window_end_ms": 4500000,
+    "narrative_hook": "Coach reacts to the right-flank leak visible in duel and cross load.",
+    "metrics_before": {
+      "flank_strike_load_home_right": 4.0,
+      "away_lb_duel_loss_rate": 1.0,
+      "midfield_turnovers": 0.0,
+      "midfield_chaos_index": 0
+    },
+    "metrics_after": {
+      "flank_strike_load_home_right": 0.0,
+      "away_lb_duel_loss_rate": 0.444,
+      "midfield_turnovers": 6.0,
+      "midfield_chaos_index": 0.6
+    },
+    "observable_outcome": "Cross volume against the left side drops; away LB duel loss rate improves in the ten minutes after the change."
+  },
+  {
+    "moment_id": "sub_mid_fix",
+    "t_sub_ms": 4320000,
+    "team_id": "away",
+    "player_off_id": "A06",
+    "player_on_id": "A13",
+    "addresses_alert_id": "chaos_press_mid",
+    "fan_window_start_ms": 4080000,
+    "fan_window_end_ms": 4920000,
+    "narrative_hook": "Midfield turnovers spiked before the pivot change.",
+    "metrics_before": {
+      "flank_strike_load_home_right": 0.0,
+      "away_lb_duel_loss_rate": 0.0,
+      "midfield_turnovers": 6.0,
+      "midfield_chaos_index": 0.6
+    },
+    "metrics_after": {
+      "flank_strike_load_home_right": 0.0,
+      "away_lb_duel_loss_rate": 0.0,
+      "midfield_turnovers": 0.0,
+      "midfield_chaos_index": 0
+    },
+    "observable_outcome": "Central turnover count falls; chaos index eases after the press-resistant sub enters."
+  }
+]
