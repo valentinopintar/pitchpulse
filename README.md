@@ -4,28 +4,14 @@
 
 > We all love being armchair managers — PitchPulse finally puts that instinct to the test.
 
-The platform processes on-pitch **synthetic** events and splits the same match intelligence into two distinct experiences:
+The platform processes on-pitch **synthetic** events and splits the same match intelligence into two experiences:
 
-- **Coaches** get the raw, real-time feed. The dashboard highlights granular tactical issues while the game is unfolding: where the team is leaking, which flank is overloaded, and who is compounding minor mistakes under pressure — so staff can make immediate adjustments and see who on the bench can stop the threat.
-- **Fans** get the **halftime reality check**. To protect tactical secrets and keep things accessible, viewers do not see the heavy coaching analytics. Instead they get a streamlined Match Day Summary: did a player really start that poorly, how exposed was the defence, and was the crowd right to demand a substitution?
+- **Coach** — live bench feed: flank/midfield leaks, explainable alerts, substitute shortlist, and a conversational agent while the clock runs.
+- **Fan** — halftime Match Day Summary: crowd calls, storylines, and an interactive pitch without exposing full coaching detail.
 
 Built for the [Inside the Game: Developer Hackathon](https://github.com/microsoft/insidethegamehackathon) (Microsoft × Premier League).
 
----
-
-## Description
-
-We all love being armchair managers, and PitchPulse finally puts that instinct to the test. The platform processes on-pitch events and splits the data into two distinct experiences tailored for the bench and the living room.
-
-Coaches get the raw, real-time feed. The dashboard highlights granular tactical issues while the game is unfolding: where the team is leaking, which flank is overloaded, and who is compounding minor mistakes under pressure, allowing for immediate tactical adjustments.
-
-Fans get the halftime reality check. To protect tactical secrets and keep things accessible, viewers don't see the heavy coaching analytics. Instead, they receive a streamlined, easy-to-digest summary of the first half's main storylines. It's a chance to test their eye against the data without getting bogged down in jargon: did a specific player really start that poorly, how many times was the defense actually exposed, and was the crowd right to demand a substitution?
-
-One intelligence engine, two views: urgent, detailed problem-solving for the coaching staff, and an engaging, stripped-down tactical recap for the fans.
-
 **Tagline:** One match brain — urgent for the bench, clear for the living room.
-
-**Keywords:** Football Analytics · Synthetic Match Intelligence · coaching alerts · tactical pressure · positional leaks · halftime summary · armchair manager · substitute shortlist · explainable AI · Coach Fan dual view · Azure OpenAI · Conversational AI Agent
 
 ---
 
@@ -44,31 +30,43 @@ Live synthetic events
 | Ingest / Interpret | Live event stream + rolling metrics | First-half rollups for HT cards |
 | Explain | Why the leak matters now | Casual verdicts (cold start, flank, crowd call) |
 | Render | Alert rail + pitch zones | Storyline cards + pitch pressure map |
-| Personalize | Live bench tools + agent | Halftime summary only (separate tab in demo) |
+| Personalize | Live bench tools + agent | Halftime summary (separate tab in demo) |
 
 ---
 
 ## Quickstart
 
+**Needs:** Python ≥ 3.11, Node ≥ 18 (conda optional).
+
 ```bash
-conda activate pitchpulse
-cd ~/projects/pitchpulse-ai
+git clone https://bitbucket.org/piworkspace/pitchpulse.git
+cd pitchpulse
 
-# dataset (if needed)
-export PYTHONPATH=src   # only if not pip install -e .
-python3 -m pitchpulse.data.generate_match --match syn-001
-python3 -m pitchpulse.interpret.assert_demo_alerts --match syn-001
+# Python env
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -e ".[api]"
 
-# API
+# Demo match dataset (syn-001 ships under data/matches/; regenerate if needed)
+export PYTHONPATH=src
+python -m pitchpulse.data.generate_match --match syn-001
+
+# Terminal 1 — API
 PORT=8011 python -m pitchpulse.api.main
 
-# UI (needs Node >= 18; conda: conda install -c conda-forge "nodejs>=20")
+# Terminal 2 — UI
 cd web && npm install && npm run dev
-# http://localhost:5173  — Fan tab = HT summary + pitch; Coach tab = live analytics + pitch
-# First visit: About modal → optional Tour. Click panels for short explanations.
 ```
 
-Useful endpoints:
+Open **http://localhost:5173**
+
+- First visit: About modal → optional Tour. Click panels for short explanations.
+- **Fan** tab = halftime summary + pitch · **Coach** tab = live analytics + pitch.
+- In the UI: **Load & run syn-001** to start the live stream.
+
+Optional Azure OpenAI / Foundry: copy `.env.example` → `.env` (templates work without it).
+
+### Useful API checks
 
 ```bash
 curl -s http://localhost:8011/fan/halftime
@@ -78,21 +76,7 @@ curl -s -X POST http://localhost:8011/agent/chat \
   -d '{"message":"Show halftime summary"}'
 ```
 
-Docs: [DATASET](docs/DATASET.md) · [INTERPRET](docs/INTERPRET.md) · [API](docs/API.md) · [EXPLAIN](docs/EXPLAIN.md) · [STUDIO](docs/STUDIO.md) · [HACKATHON-AI](docs/HACKATHON-AI.md)
-
-Optional Azure OpenAI / Foundry: copy `.env.example` → `.env` (templates work without it).
-
----
-
-## Status / roadmap
-
-1. ~~Scaffold + synthetic generator~~
-2. ~~Interpret + alert rules~~
-3. ~~FastAPI + SSE~~
-4. ~~Explain / personalize~~
-5. ~~Shortlist + agent + studio UI~~
-6. ~~Dual Fan HT / Coach live alignment (this update)~~
-7. Demo script + submission polish
+More detail: [DATASET](docs/DATASET.md) · [INTERPRET](docs/INTERPRET.md) · [API](docs/API.md) · [EXPLAIN](docs/EXPLAIN.md) · [STUDIO](docs/STUDIO.md) · [HACKATHON-AI](docs/HACKATHON-AI.md)
 
 ---
 
