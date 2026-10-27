@@ -23,8 +23,8 @@ export const api = {
   setViewer: (viewer) =>
     request("/viewer", { method: "POST", body: JSON.stringify(viewer) }),
   shortlist: (alertId) => request(`/shortlist/${alertId}`),
-  chat: (message) =>
-    request("/agent/chat", { method: "POST", body: JSON.stringify({ message }) }),
+  chat: (message, audience = "coach") =>
+    request("/agent/chat", { method: "POST", body: JSON.stringify({ message, audience }) }),
   substitution: (momentId) => request(`/substitutions/${momentId}`),
   halftime: () => request("/fan/halftime"),
   fanLive: (minute = 0) => request(`/fan/live?minute=${encodeURIComponent(minute)}`),

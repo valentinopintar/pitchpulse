@@ -29,6 +29,8 @@ They do **not** redistribute real Premier League match data or a free OpenAI san
 | `AZURE_OPENAI_DEPLOYMENT` | Model deployment name |
 | `AZURE_OPENAI_API_VERSION` | API version |
 
+For local testing you can instead set `OPENAI_API_KEY` (+ optional `OPENAI_MODEL`, default `gpt-4.1`); Azure wins when both are set.
+
 Without these, `POST /explain/alert` and SSE alerts still return **template** copy (`source: "template"`). With them, explain can return `source: "azure_openai"`.
 
 ```bash
@@ -39,3 +41,22 @@ PORT=8011 python -m pitchpulse.api.main
 ```
 
 See [EXPLAIN.md](EXPLAIN.md) and [API.md](API.md).
+
+## Multi-agent bench team
+
+`POST /agent/chat` runs a team of agents ([team.py](../src/pitchpulse/agent/team.py)):
+
+| Agent | Role | Tools |
+| --- | --- | --- |
+| **Orchestrator** | Routes the question with `handoff_to_*` tools, writes the final answer in the user's language | handoffs, `set_viewer_profile` |
+| **Match Analyst** | What is leaking and why it matters now; sets the focus alert | `get_match_clock`, `get_match_state`, `list_alerts`, `explain_alert` |
+| **Bench Scout** | Substitutes whose profile closes the focus gap | `propose_roles_for_alert`, `list_alerts` |
+| **Storyteller** | Fan halftime summary, recap, overlay copy (any language) | `get_fan_halftime`, `generate_match_recap`, `get_overlay_packet` |
+| **Crowd Pulse** (fan team) | What other fans think, how a player is doing — summary level | `get_crowd_pulse`, `get_player_status`, `get_match_clock` |
+
+Two audiences share the agents: the **coach team** (Analyst, Bench Scout, Storyteller) and the **fan team** (Crowd Pulse, Storyteller; `"audience": "fan"`), which can't reach coach-only tools. All tool calls go through the [MCP server](MCP.md).
+
+- **Shared state** — a per-request blackboard holds the focus alert and each agent's report; every specialist sees teammates' findings in its prompt.
+- **Function calling** — each agent is an Azure OpenAI tool loop (`chat_with_tools`) limited to its own tools.
+- **Recovery** — every agent has a rule-based twin ([rules.py](../src/pitchpulse/agent/rules.py)). If a model call fails, that agent finishes on rules and the run continues (`engine: "mixed"`, `recovered: true`). Without Azure the whole team runs on rules.
+- **Trace** — the response carries `trace` (handoffs, tool calls, reports, recoveries with timings); the Coach tab shows it under each answer. Send `"engine": "rules"` to force the rule-based team.

@@ -7,18 +7,20 @@ import json
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from pitchpulse.agent.chat import agent_chat
 from pitchpulse.agent import tools as agent_tools
+from pitchpulse.agent.team import SPECIALISTS
 from pitchpulse.api.replay_session import SESSION, ReplayStatus
 from pitchpulse.api.studio_state import STUDIO
 from pitchpulse.config import load_dotenv
 from pitchpulse.data.paths import match_dir
 from pitchpulse.explain.azure_client import azure_configured
 from pitchpulse.explain.service import EXPLAIN
+from pitchpulse.mcp import server as mcp_server
 from pitchpulse.personalize.halftime import build_fan_live, build_halftime_summary
 from pitchpulse.personalize.viewer import ViewerProfile
 from pitchpulse.render.overlay import build_overlay_packet
@@ -187,7 +189,13 @@ def shortlist_for_alert(alert_id: str, team_side: str | None = None) -> dict[str
 
 @api_app.get("/agent/tools")
 def list_agent_tools() -> dict[str, Any]:
-    return {"tools": agent_tools.TOOL_SPECS}
+    return {
+        "tools": agent_tools.TOOL_SPECS,
+        "agents": [
+            {"key": s.key, "name": s.name, "role": s.role, "tools": list(s.tools)}
+            for s in SPECIALISTS.values()
+        ],
+    }
 
 
 @api_app.post("/agent/chat")
@@ -195,7 +203,34 @@ def chat_with_agent(body: dict[str, Any]) -> dict[str, Any]:
     message = (body.get("message") or "").strip()
     if not message:
         raise HTTPException(status_code=400, detail="message required")
-    return agent_chat(message)
+    return agent_chat(message, engine=body.get("engine"), audience=body.get("audience") or "coach")
+
+
+@api_app.post("/mcp")
+async def mcp_endpoint(request: Request) -> Response:
+    """MCP Streamable HTTP (JSON responses). Requires `Authorization: Bearer $PITCHPULSE_MCP_KEY`."""
+    if not mcp_server.mcp_key():
+        return JSONResponse({"error": "MCP over HTTP is disabled: set PITCHPULSE_MCP_KEY"}, 503)
+    auth = request.headers.get("authorization") or request.headers.get("x-api-key")
+    if not mcp_server.authorized(auth):
+        return JSONResponse({"error": "unauthorized"}, 401,
+                            headers={"WWW-Authenticate": 'Bearer realm="pitchpulse-mcp"'})
+    try:
+        payload = await request.json()
+    except ValueError:
+        return JSONResponse({"jsonrpc": "2.0", "id": None,
+                             "error": {"code": -32700, "message": "Parse error"}}, 400)
+    if isinstance(payload, list):
+        replies = [r for r in (await asyncio.to_thread(mcp_server.handle, m) for m in payload) if r]
+        return JSONResponse(replies) if replies else Response(status_code=202)
+    reply = await asyncio.to_thread(mcp_server.handle, payload)
+    return JSONResponse(reply) if reply else Response(status_code=202)
+
+
+@api_app.get("/mcp")
+def mcp_stream_not_supported() -> Response:
+    # No server-initiated stream: clients fall back to plain request/response.
+    return Response(status_code=405, headers={"Allow": "POST"})
 
 
 @api_app.get("/fan/live")
@@ -377,6 +412,8 @@ def _build_app() -> FastAPI:
     return root
 
 
+# Load .env at import: a mounted sub-app's lifespan never runs, so the /api build would miss it.
+load_dotenv()
 app = _build_app()
 
 

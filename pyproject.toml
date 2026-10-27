@@ -15,6 +15,7 @@ api = [
 ]
 dev = [
   "pytest>=8.0",
+  "httpx2",
   "ruff>=0.4",
 ]
 

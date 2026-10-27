@@ -62,9 +62,13 @@ export const EXPLAIN = {
     title: "Who can fix this",
     text: "Bench profiles scored against the alert gap (e.g. cross-defending full-back) from the synthetic roster catalog.",
   },
+  fanChat: {
+    title: "Fan Companion",
+    text: "A fan-side agent team (Crowd Pulse + Storyteller) answers what the stands think and how a player is doing — summary level, no coaching detail. Tools are called over MCP; answers come back in your language when an LLM is configured.",
+  },
   agent: {
-    title: "Bench agent",
-    text: "Ask natural-language questions (“What is leaking?”, “Who can fix the flank?”). It calls the same tools as the UI.",
+    title: "Bench agent team",
+    text: "An Orchestrator hands your question to a Match Analyst, Bench Scout and Storyteller that share one blackboard and call the same tools as the UI. Open the trace under each answer to see every handoff.",
   },
   tabs: {
     title: "Fan / Coach tabs",

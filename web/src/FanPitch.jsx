@@ -4,6 +4,7 @@ export default function FanPitch({
   players = [],
   problems = [],
   onExplain,
+  onAskAbout,
   liveMinute = null,
   liveRunning = false,
 }) {
@@ -89,6 +90,11 @@ export default function FanPitch({
                 {selected.team_side === "home" ? "Northbridge" : "Riverdale"} · {throughLabel}
               </div>
             </div>
+            {onAskAbout ? (
+              <button type="button" className="ask-about" onClick={() => onAskAbout(selected)}>
+                Ask about
+              </button>
+            ) : null}
             <button type="button" className="explain-close" onClick={() => setSelectedId(null)}>
               ×
             </button>

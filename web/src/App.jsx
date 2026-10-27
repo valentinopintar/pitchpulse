@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "./api";
+import AgentTrace from "./AgentTrace.jsx";
+import FanChat from "./FanChat.jsx";
 import FanPitch from "./FanPitch.jsx";
 import FanTeamBoard from "./FanTeamBoard.jsx";
 import { AboutModal, ExplainPopover, TourBubble, useTargetRect } from "./GuideOverlays.jsx";
@@ -53,6 +55,7 @@ export default function App() {
   const [fanLive, setFanLive] = useState(null);
   const [chat, setChat] = useState([]);
   const [chatInput, setChatInput] = useState("");
+  const [fanAsk, setFanAsk] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const esRef = useRef(null);
@@ -209,7 +212,16 @@ export default function App() {
     setChat((prev) => [...prev, { role: "user", text: message }]);
     try {
       const res = await api.chat(message);
-      setChat((prev) => [...prev, { role: "agent", text: res.reply }]);
+      setChat((prev) => [
+        ...prev,
+        {
+          role: "agent",
+          text: res.reply,
+          trace: res.trace,
+          engine: res.engine,
+          recovered: res.recovered,
+        },
+      ]);
       const shortCall = (res.tool_calls || []).find((t) => t.tool === "propose_roles_for_alert");
       if (shortCall?.result) setShortlist(shortCall.result);
     } catch (err) {
@@ -393,13 +405,22 @@ export default function App() {
               liveRunning={Boolean(status?.running)}
             />
           </div>
-          <FanPitch
-            players={pitchPlayers}
-            problems={problems}
-            onExplain={openExplain}
-            liveMinute={minute ?? fanLive?.minute ?? 0}
-            liveRunning={Boolean(status?.running)}
-          />
+          <div className="fan-live-row">
+            <FanPitch
+              players={pitchPlayers}
+              problems={problems}
+              onExplain={openExplain}
+              onAskAbout={(p) =>
+                setFanAsk({
+                  text: `How is #${p.shirt} ${p.name} doing, and what do the fans think?`,
+                  nonce: Date.now(),
+                })
+              }
+              liveMinute={minute ?? fanLive?.minute ?? 0}
+              liveRunning={Boolean(status?.running)}
+            />
+            <FanChat ask={fanAsk} onExplain={openExplain} />
+          </div>
         </div>
       ) : (
         <div className="split">
@@ -496,6 +517,7 @@ export default function App() {
                     chat.map((m, i) => (
                       <div key={i} className={`bubble ${m.role}`}>
                         {m.text}
+                        <AgentTrace trace={m.trace} engine={m.engine} recovered={m.recovered} />
                       </div>
                     ))
                   )}

@@ -48,7 +48,7 @@ class ExplainService:
         modes = template_modes_for_alert(alert_id, evidence)
         source = "template"
 
-        if use_llm and azure_client.azure_configured():
+        if use_llm and azure_client.llm_configured():
             user = json.dumps(
                 {
                     "alert_id": alert_id,
@@ -66,7 +66,7 @@ class ExplainService:
                     "analyst": str(llm["analyst"]),
                     "fan": str(llm["fan"]),
                 }
-                source = "azure_openai"
+                source = azure_client.provider() or "template"
 
         out = {
             "alert_id": alert_id,

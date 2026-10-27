@@ -6,8 +6,9 @@
 
 The platform processes on-pitch **synthetic** events and splits the same match intelligence into two experiences:
 
-- **Coach** — live bench feed: flank/midfield leaks, explainable alerts, substitute shortlist, and a conversational agent while the clock runs.
-- **Fan** — halftime Match Day Summary: crowd calls, storylines, and an interactive pitch without exposing full coaching detail.
+- **Coach** — live bench feed: flank/midfield leaks, explainable alerts, substitute shortlist, and a multi-agent bench team (Orchestrator → Match Analyst, Bench Scout, Storyteller on Azure OpenAI function calling, with a visible trace) while the clock runs.
+- **Fan** — halftime Match Day Summary: crowd calls, storylines, an interactive pitch, and a Fan Companion chat (Crowd Pulse + Storyteller agents: what other fans think, how a player is doing) without exposing full coaching detail.
+- **MCP** — every agent tool call goes through a PitchPulse MCP server (`/api/mcp`, bearer-key protected) that external clients like GitHub Copilot can use too. See [MCP](docs/MCP.md).
 
 Built for the [Inside the Game: Developer Hackathon](https://github.com/microsoft/insidethegamehackathon) (Microsoft × Premier League).
 
@@ -66,7 +67,17 @@ Open **[http://localhost:5173](http://localhost:5173)**
 - **Fan** tab = halftime summary + pitch · **Coach** tab = live analytics + pitch.
 - In the UI: **Load & run syn-001** to start the live stream.
 
-Optional Azure OpenAI / Foundry: copy `.env.example` → `.env` (templates work without it).
+### LLM is optional
+
+Copy `.env.example` → `.env` (git-ignored, never committed) and fill **one** option:
+
+| Option | Env vars | What you get |
+| --- | --- | --- |
+| **A. Azure OpenAI / Foundry** (preferred) | `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_DEPLOYMENT` | Model-driven agent team + LLM narratives |
+| **B. OpenAI API** (local testing) | `OPENAI_API_KEY`, `OPENAI_MODEL` (default `gpt-4.1`) | Same as A via api.openai.com |
+| **None** (default) | — | Rule-based agent team + template narratives |
+
+Without a key the app and the bench chat **still work**: the same four agents run on keyword routing and the trace shows `RULES`. What you lose is free-form questions, answers in other languages (the LLM replies in the user's language), and model-written explanations. Try rule-based prompts such as “What is leaking?”, “Who can fix the flank?”, “Show halftime summary”.
 
 ### Useful API checks
 
@@ -78,7 +89,7 @@ curl -s -X POST http://localhost:8011/agent/chat \
   -d '{"message":"Show halftime summary"}'
 ```
 
-More detail: [DATASET](docs/DATASET.md) · [INTERPRET](docs/INTERPRET.md) · [API](docs/API.md) · [EXPLAIN](docs/EXPLAIN.md) · [STUDIO](docs/STUDIO.md) · [HACKATHON-AI](docs/HACKATHON-AI.md)
+More detail: [MCP](docs/MCP.md) · [DATASET](docs/DATASET.md) · [INTERPRET](docs/INTERPRET.md) · [API](docs/API.md) · [EXPLAIN](docs/EXPLAIN.md) · [STUDIO](docs/STUDIO.md) · [HACKATHON-AI](docs/HACKATHON-AI.md)
 
 ---
 
