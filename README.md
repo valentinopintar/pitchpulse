@@ -14,6 +14,12 @@ Built for the [Inside the Game: Developer Hackathon](https://github.com/microsof
 
 **Tagline:** One match brain — urgent for the bench, clear for the living room.
 
+## Live demo
+
+**https://pitchpulse-pkh1.onrender.com/** → click **Load & run syn-001**.
+
+> **No LLM keys are configured on the hosted demo.** Dashboards, alerts, shortlist, fan cards and pitch work fully. The Coach and Fan chats run on the **rule-based agent team** only: English, keyword questions such as “What is leaking?”, “Who can fix the flank?”, “What do the other fans think right now?”, “How is #6 doing?”. Free-form questions, answers in other languages and model-written explanations need an LLM key — run locally with your own key (see [LLM is optional](#llm-is-optional)); the demo video was recorded that way. If the instance has been idle, the first load can take up to a minute while Render wakes it.
+
 ---
 
 ## Pipeline
