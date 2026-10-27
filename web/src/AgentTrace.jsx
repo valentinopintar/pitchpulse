@@ -3,8 +3,10 @@ import { useState } from "react";
 const AGENT_LABEL = {
   orchestrator: "Orchestrator",
   analyst: "Match Analyst",
+  tactician: "Tactician",
   bench_scout: "Bench Scout",
   storyteller: "Storyteller",
+  crowd_pulse: "Crowd Pulse",
 };
 
 const ENGINE_LABEL = {

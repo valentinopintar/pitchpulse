@@ -88,6 +88,35 @@ body {
   font-size: 0.95rem;
 }
 
+.scoreboard .score.goal-flash {
+  animation: goal-pop 1.2s ease-out;
+}
+
+.scoreboard .last-goal {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.scoreboard .last-goal.fresh {
+  color: var(--lime);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+@keyframes goal-pop {
+  0% {
+    transform: scale(1);
+    color: var(--lime);
+  }
+  25% {
+    transform: scale(1.18);
+    color: var(--lime);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .top-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1095,6 +1124,14 @@ button:disabled {
 
 .agent-chip.bench_scout {
   color: var(--amber);
+}
+
+.agent-chip.tactician {
+  color: #c9a7ff;
+}
+
+.agent-chip.crowd_pulse {
+  color: #ff9db0;
 }
 
 .agent-chip.storyteller {

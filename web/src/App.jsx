@@ -56,6 +56,7 @@ export default function App() {
   const [chat, setChat] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [fanAsk, setFanAsk] = useState(null);
+  const [goalFlash, setGoalFlash] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const esRef = useRef(null);
@@ -107,6 +108,15 @@ export default function App() {
           if (msg.type === "connected" || msg.type === "done" || msg.type === "state") {
             setStatus((prev) => ({ ...(prev || {}), ...(msg.payload || {}) }));
           }
+          if (msg.type === "goal") {
+            const { score, goal } = msg.payload || {};
+            setStatus((prev) => ({
+              ...(prev || {}),
+              score,
+              match_minute: Math.max(prev?.match_minute ?? 0, goal?.minute ?? 0),
+            }));
+            setGoalFlash({ ...goal, nonce: Date.now() });
+          }
           if (msg.type === "alert") {
             const payload = msg.payload || {};
             setAlerts((prev) => {
@@ -131,6 +141,12 @@ export default function App() {
   );
 
   useEffect(() => () => esRef.current?.close(), []);
+
+  useEffect(() => {
+    if (!goalFlash) return undefined;
+    const t = setTimeout(() => setGoalFlash(null), 6000);
+    return () => clearTimeout(t);
+  }, [goalFlash]);
 
   useEffect(() => {
     if (!selectedAlert || view !== "coach") return;
@@ -160,6 +176,7 @@ export default function App() {
     setBusy(true);
     setError("");
     setAlerts([]);
+    setGoalFlash(null);
     try {
       await api.load("syn-001");
       await syncViewer(view);
@@ -302,7 +319,9 @@ export default function App() {
   const teamBoards = loc?.team_boards || halftime?.team_boards;
   const pitchPlayers = fanLive?.pitch_players || loc?.pitch_players || [];
   const problems = fanLive?.problems || loc?.problems || [];
-  const scoreline = halftime?.scoreline || "1-1";
+  // Live score follows the replay clock; before a match is loaded show the final summary score.
+  const scoreline = (status?.loaded && status?.score?.scoreline) || halftime?.scoreline || "1-1";
+  const lastGoal = status?.loaded ? status?.score?.last_goal : null;
   const home = halftime?.home_team || "Northbridge FC";
   const away = halftime?.away_team || "Riverdale United";
   const minute = status?.match_minute;
@@ -318,9 +337,15 @@ export default function App() {
           <div className="phase">
             {fanMode ? "Match Day Summary" : "Pro Bench — Live"}
           </div>
-          <div className="score">
+          <div className={`score${goalFlash ? " goal-flash" : ""}`} key={goalFlash?.nonce}>
             {home} {scoreline} {away}
           </div>
+          {lastGoal ? (
+            <div className={`last-goal${goalFlash ? " fresh" : ""}`}>
+              {goalFlash ? "GOAL! " : "⚽ "}
+              {lastGoal.name} {Math.floor(lastGoal.minute)}&apos;
+            </div>
+          ) : null}
           <div className="clock">
             {fanMode
               ? status?.running || status?.loaded
@@ -512,7 +537,10 @@ export default function App() {
                 </strong>
                 <div className="chat-log" style={{ marginTop: "0.4rem" }}>
                   {chat.length === 0 ? (
-                    <div className="bubble">Ask: “What is leaking?” / “Who can fix the flank?”</div>
+                    <div className="bubble">
+                      Ask: “What is leaking?” / “How do we fix it without a sub?” / “Who can fix
+                      the flank?”
+                    </div>
                   ) : (
                     chat.map((m, i) => (
                       <div key={i} className={`bubble ${m.role}`}>

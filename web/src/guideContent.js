@@ -64,11 +64,11 @@ export const EXPLAIN = {
   },
   fanChat: {
     title: "Fan Companion",
-    text: "A fan-side agent team (Crowd Pulse + Storyteller) answers what the stands think and how a player is doing — summary level, no coaching detail. Tools are called over MCP; answers come back in your language when an LLM is configured.",
+    text: "A fan-side agent team (Crowd Pulse + Storyteller) answers what the stands think, how a player is doing, and whether the fans' criticism is backed by the numbers — summary level, no coaching detail. Tools are called over MCP; answers come back in your language when an LLM is configured.",
   },
   agent: {
     title: "Bench agent team",
-    text: "An Orchestrator hands your question to a Match Analyst, Bench Scout and Storyteller that share one blackboard and call the same tools as the UI. Open the trace under each answer to see every handoff.",
+    text: "An Orchestrator hands your question to a Match Analyst, Tactician (formation, role and pressing fixes without a sub), Bench Scout and Storyteller that share one blackboard and call the same tools as the UI. Open the trace under each answer to see every handoff.",
   },
   tabs: {
     title: "Fan / Coach tabs",

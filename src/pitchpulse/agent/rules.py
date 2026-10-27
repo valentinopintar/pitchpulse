@@ -24,7 +24,33 @@ ANALYST_WORDS = (
     "explain",
     "wrong",
 )
-SCOUT_WORDS = ("shortlist", "bench", "who can", "fix", "profile", "sub")
+SCOUT_WORDS = ("shortlist", "bench", "who can", "profile", "sub")
+TACTIC_WORDS = (
+    "tactic",
+    "formation",
+    "shape",
+    "system",
+    "fix",
+    "adjust",
+    "what should",
+    "what can we",
+    "without",
+    "press",
+)
+VERDICT_WORDS = (
+    "bad",
+    "worst",
+    "struggl",
+    "poor",
+    "blame",
+    "unhappy",
+    "criticis",
+    "fair",
+    "deserve",
+    "data",
+    "numbers",
+    "back",
+)
 STORY_WORDS = (
     "overlay",
     "graphic",
@@ -39,8 +65,9 @@ STORY_WORDS = (
 )
 
 HELP_TEXT = (
-    "Two views, one engine. Coach: leaks, explain, bench fix. "
-    "Fan: halftime summary. Try: “What is leaking?” or “Show halftime summary.”"
+    "Two views, one engine. Coach: leaks, explain, on-pitch fix, bench fix. "
+    "Fan: halftime summary. Try: “What is leaking?”, “How do we fix it without a sub?” "
+    "or “Show halftime summary.”"
 )
 
 
@@ -89,9 +116,13 @@ def route(lower: str) -> list[str]:
     """Which specialists to run, in order. Bench Scout always follows the Analyst's focus."""
     plan: list[str] = []
     wants_scout = _mentions(lower, SCOUT_WORDS)
-    if wants_scout or _mentions(lower, ANALYST_WORDS):
+    # A sub is not always possible, so a bench question also gets the on-pitch option.
+    wants_tactics = wants_scout or _mentions(lower, TACTIC_WORDS)
+    if wants_tactics or _mentions(lower, ANALYST_WORDS):
         plan.append("analyst")
-    if wants_scout:
+    if wants_tactics:
+        plan.append("tactician")
+    if wants_scout and not re.search(r"\b(without|no) (a )?sub", lower):
         plan.append("bench_scout")
     if _mentions(lower, STORY_WORDS):
         plan.append("storyteller")
@@ -105,7 +136,28 @@ def route_fan(lower: str) -> list[str]:
     return ["crowd_pulse"]
 
 
+def fan_verdicts(board: Blackboard) -> str:
+    v = board.call_tool("crowd_pulse", "get_fan_verdicts", {})
+    parts = [f"Fan verdicts at {v.get('match_minute', 0):.0f}' ({v.get('scoreline')}):"]
+    for side in ("home", "away"):
+        team = v.get(side)
+        if not team:
+            continue
+        for c in team["criticised"][:2]:
+            evidence = "; ".join(c["data_against"] + c["data_for"]) or "nothing stands out"
+            parts.append(
+                f"{team['team_name']}: {c['player']} — {c['fans_unhappy_pct']}% of fans unhappy "
+                f"({c['fans_say'].lower()}). Data: {evidence}. Verdict: {c['verdict']}."
+            )
+        if team.get("fans_may_be_missing"):
+            m = team["fans_may_be_missing"]
+            parts.append(f"Under the radar: {m['player']} — {'; '.join(m['data_against'])}.")
+    return "\n".join(parts)
+
+
 def crowd_pulse(board: Blackboard, task: str) -> str:
+    if _mentions(task.lower(), VERDICT_WORDS):
+        return fan_verdicts(board)
     status = board.call_tool("crowd_pulse", "get_player_status", {"player": task})
     if "error" not in status:
         parts = []
@@ -186,6 +238,26 @@ def analyst(board: Blackboard, task: str) -> str:
         if pers.get("why_it_matters"):
             parts.append(f"Why it matters: {pers['why_it_matters']}")
     board.focus_alert_id = board.focus_alert_id or alert_id
+    return "\n".join(parts)
+
+
+def tactician(board: Blackboard, task: str) -> str:
+    alert_id = board.focus_alert_id or detect_alert_id(task, [])
+    t = board.call_tool("tactician", "suggest_tactical_adjustments", {"alert_id": alert_id})
+    if "error" in t:
+        return t["error"]
+    evidence = ", ".join(f"{k}={v}" for k, v in t["evidence"].items() if v is not None)
+    parts = [
+        (
+            f"{t['team']} ({t['current_formation']}, {t['game_state']} {t['score_for_team']} at "
+            f"{t['match_minute']:.0f}'): {t['timing']['advice']}"
+        )
+    ]
+    if evidence:
+        parts.append(f"Evidence: {evidence}.")
+    for i, o in enumerate(t["options"][:2]):
+        label = "Without a sub" if i == 0 else "Alternative"
+        parts.append(f"{label} [{o['type']}]: {o['change']} — {o['how']} Trade-off: {o['tradeoff']}")
     return "\n".join(parts)
 
 

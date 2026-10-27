@@ -6,8 +6,8 @@
 
 The platform processes on-pitch **synthetic** events and splits the same match intelligence into two experiences:
 
-- **Coach** — live bench feed: flank/midfield leaks, explainable alerts, substitute shortlist, and a multi-agent bench team (Orchestrator → Match Analyst, Bench Scout, Storyteller on Azure OpenAI function calling, with a visible trace) while the clock runs.
-- **Fan** — halftime Match Day Summary: crowd calls, storylines, an interactive pitch, and a Fan Companion chat (Crowd Pulse + Storyteller agents: what other fans think, how a player is doing) without exposing full coaching detail.
+- **Coach** — live bench feed with a scoreboard that follows the clock: flank/midfield leaks, explainable alerts, substitute shortlist, and a multi-agent bench team (Orchestrator → Match Analyst, Tactician, Bench Scout, Storyteller on Azure OpenAI function calling, with a visible trace). The Tactician fixes a leak without a sub (formation, role, pressing changes), because a 33rd-minute substitution is not always an option.
+- **Fan** — halftime Match Day Summary: crowd calls, storylines, an interactive pitch, and a Fan Companion chat (Crowd Pulse + Storyteller agents: what other fans think, how a player is doing, and whether the fans' criticism is backed by the numbers) without exposing full coaching detail.
 - **MCP** — every agent tool call goes through a PitchPulse MCP server (`/api/mcp`, bearer-key protected) that external clients like GitHub Copilot can use too. See [MCP](docs/MCP.md).
 
 Built for the [Inside the Game: Developer Hackathon](https://github.com/microsoft/insidethegamehackathon) (Microsoft × Premier League).
@@ -18,7 +18,7 @@ Built for the [Inside the Game: Developer Hackathon](https://github.com/microsof
 
 **https://pitchpulse-pkh1.onrender.com/** → click **Load & run syn-001**.
 
-> **No LLM keys are configured on the hosted demo.** Dashboards, alerts, shortlist, fan cards and pitch work fully. The Coach and Fan chats run on the **rule-based agent team** only: English, keyword questions such as “What is leaking?”, “Who can fix the flank?”, “What do the other fans think right now?”, “How is #6 doing?”. Free-form questions, answers in other languages and model-written explanations need an LLM key — run locally with your own key (see [LLM is optional](#llm-is-optional)); the demo video was recorded that way. If the instance has been idle, the first load can take up to a minute while Render wakes it.
+> **No LLM keys are configured on the hosted demo.** Dashboards, alerts, shortlist, fan cards and pitch work fully. The Coach and Fan chats run on the **rule-based agent team** only: English, keyword questions such as “What is leaking?”, “How do we fix it without a sub?”, “Who can fix the flank?”, “What do the other fans think right now?”, “Who are the fans unhappy with — and do the numbers back them up?”, “How is #6 doing?”. Free-form questions, answers in other languages and model-written explanations need an LLM key — run locally with your own key (see [LLM is optional](#llm-is-optional)); the demo video was recorded that way. If the instance has been idle, the first load can take up to a minute while Render wakes it.
 
 ---
 

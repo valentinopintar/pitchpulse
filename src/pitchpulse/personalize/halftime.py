@@ -8,6 +8,7 @@ from typing import Any
 
 from pitchpulse.data.paths import match_dir
 from pitchpulse.data.pitch import ms_from_minute
+from pitchpulse.data.score import goals, score_at
 from pitchpulse.data.snapshots import _event_type
 from pitchpulse.interpret.events_io import load_events
 from pitchpulse.schema.events import EventType, MatchEvent
@@ -275,6 +276,7 @@ def _ht_player_stats(
     *,
     home_gk: str = "H01",
     away_gk: str = "A01",
+    scored: list[dict[str, Any]] | None = None,
 ) -> dict[str, dict[str, Any]]:
     stats: dict[str, dict[str, Any]] = defaultdict(
         lambda: {
@@ -333,6 +335,8 @@ def _ht_player_stats(
                 s["duels_won"] += 1
             else:
                 s["duels_lost"] += 1
+    if scored:
+        _apply_goals(stats, scored, events)
     out: dict[str, dict[str, Any]] = {}
     for pid, s in stats.items():
         passes = s["passes"]
@@ -506,6 +510,32 @@ def _build_pitch_players(
                 }
             )
     return players
+
+
+def _apply_goals(
+    stats: dict[str, dict[str, Any]],
+    scored: list[dict[str, Any]],
+    events: list[MatchEvent],
+) -> None:
+    """Credit goals from the meta timeline; an on-target shot just before a goal was not a save."""
+    for g in scored:
+        pid = g["player_id"]
+        keeper = "A01" if g["team_side"] == "home" else "H01"
+        stats[pid]["goals"] += 1
+        stats[keeper]["goals_conceded"] += 1
+        t_goal = ms_from_minute(float(g["minute"]))
+        if any(
+            e.player_id == pid
+            and _event_type(e) == EventType.SHOT.value
+            and e.outcome == "on_target"
+            and 0 <= t_goal - e.t_ms <= 60_000
+            for e in events
+        ):
+            stats[keeper]["saves"] = max(0, stats[keeper]["saves"] - 1)
+        else:  # no shot event logged for this goal: count it as one
+            stats[pid]["touches"] += 1
+            stats[pid]["shots"] += 1
+            stats[pid]["shots_on"] += 1
 
 
 def _events_window(events: list[MatchEvent], minute_start: int, minute_end: int) -> list[MatchEvent]:
@@ -1023,7 +1053,8 @@ def build_fan_live(match_id: str, minute: float) -> dict[str, Any]:
         expected = json.loads((mdir / "expected_alerts.json").read_text(encoding="utf-8"))
 
     events_so_far = [e for e in load_events(match_id) if e.t_ms <= t_cap]
-    stats = _ht_player_stats(events_so_far)
+    live_score = score_at(match_id, minute)
+    stats = _ht_player_stats(events_so_far, scored=live_score["goals"])
     problems = _problems_live_at_minute(minute, expected, events_so_far)
     pitch_players = _build_pitch_players(lineups, stats, problems, crowd_by_player=None)
 
@@ -1050,6 +1081,7 @@ def build_fan_live(match_id: str, minute: float) -> dict[str, Any]:
     return {
         "match_id": match_id,
         "minute": round(minute, 2),
+        "score": live_score,
         "problems": problems,
         "pitch_players": pitch_players,
     }
@@ -1075,7 +1107,7 @@ def build_halftime_summary(match_id: str) -> dict[str, Any]:
     chances = _chance_conversion(all_events)
     crosses = _cross_productivity(all_events)
     crowd = _crowd_call(expected, subs, cold)
-    stats = _ht_player_stats(all_events)
+    stats = _ht_player_stats(all_events, scored=goals(match_id))
     problems = _build_problems(cold, flank, chances, crosses, expected)
     charts = _build_charts(stats, lineups, cold, chances, crosses, flank, crowd)
 

@@ -29,11 +29,23 @@ def test_rules_team_hands_focus_from_analyst_to_scout():
 
     assert result["engine"] == "rules"
     handoffs = [t["agent"] for t in result["trace"] if t["kind"] == "handoff"]
-    assert handoffs == ["analyst", "bench_scout"]
+    assert handoffs == ["analyst", "tactician", "bench_scout"]
     scout_call = next(c for c in result["tool_calls"] if c["tool"] == "propose_roles_for_alert")
     assert scout_call["agent"] == "bench_scout"
     assert scout_call["args"]["alert_id"] == result["focus_alert_id"]
+    assert "Without a sub" in result["reply"]
     assert "Gap:" in result["reply"]
+
+
+def test_rules_team_fix_without_sub_skips_bench_scout():
+    result = agent_chat("How do we fix the flank without a sub?", engine="rules")
+
+    handoffs = [t["agent"] for t in result["trace"] if t["kind"] == "handoff"]
+    assert handoffs == ["analyst", "tactician"]
+    tactics = next(c for c in result["tool_calls"] if c["tool"] == "suggest_tactical_adjustments")
+    assert tactics["args"]["alert_id"] == result["focus_alert_id"]
+    assert tactics["result"]["options"]
+    assert "Gap:" not in result["reply"]
 
 
 def test_rules_team_storyteller_and_help():
@@ -141,6 +153,7 @@ def test_orchestrator_failure_falls_back_to_rules_team(fake_azure):
     assert "Gap:" in result["reply"]
     assert [t["agent"] for t in result["trace"] if t["kind"] == "handoff"] == [
         "analyst",
+        "tactician",
         "bench_scout",
     ]
 

@@ -4,6 +4,7 @@ import AgentTrace from "./AgentTrace.jsx";
 
 const SUGGESTIONS = [
   "What do the other fans think right now?",
+  "Who are the fans unhappy with — and do the numbers back them up?",
   "Who is the man of the match so far?",
   "Tell me the story of the match",
 ];

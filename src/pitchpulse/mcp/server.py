@@ -27,6 +27,7 @@ COACH_ONLY = {
     "list_alerts",
     "explain_alert",
     "propose_roles_for_alert",
+    "suggest_tactical_adjustments",
     "set_viewer_profile",
 }
 

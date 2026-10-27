@@ -14,7 +14,7 @@ Streamable HTTP with JSON responses, protocol `2025-06-18`). The same server is 
 | Endpoint | `POST /api/mcp` (single container) · `POST /mcp` (API-only dev server) |
 | Auth | `Authorization: Bearer $PITCHPULSE_MCP_KEY` (`X-API-Key` also accepted) |
 | Methods | `initialize`, `ping`, `tools/list`, `tools/call` (notifications → `202`) |
-| Tools | coach: `get_match_state`, `list_alerts`, `explain_alert`, `propose_roles_for_alert`, `set_viewer_profile` · any: `get_match_clock`, `get_overlay_packet`, `generate_match_recap`, `get_fan_halftime`, `get_crowd_pulse`, `get_player_status` |
+| Tools | coach: `get_match_state`, `list_alerts`, `explain_alert`, `propose_roles_for_alert`, `suggest_tactical_adjustments`, `set_viewer_profile` · any: `get_match_clock`, `get_overlay_packet`, `generate_match_recap`, `get_fan_halftime`, `get_crowd_pulse`, `get_player_status`, `get_fan_verdicts` |
 
 ## Security
 

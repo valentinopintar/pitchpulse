@@ -1,4 +1,4 @@
-"""Multi-agent bench team: Orchestrator → Match Analyst / Bench Scout / Storyteller.
+"""Multi-agent bench team: Orchestrator → Match Analyst / Tactician / Bench Scout / Storyteller.
 
 Each agent runs on Azure OpenAI function calling when configured. Agents coordinate through a
 shared Blackboard (focus alert + teammates' findings). Every agent has a rule-based twin in
@@ -22,6 +22,7 @@ from pitchpulse.mcp.server import COACH_ONLY
 MAX_TOOL_ROUNDS = 4
 MAX_HANDOFFS = 4
 RESULT_CHARS = 3500
+FOCUS_TOOLS = ("explain_alert", "suggest_tactical_adjustments", "propose_roles_for_alert")
 
 
 @dataclass
@@ -61,7 +62,7 @@ class Blackboard:
                 self.log(agent, "recovered", self.mcp.fallback_reason)
                 self.mcp.fallback_reason = None
         ok = not (isinstance(result, dict) and "error" in result)
-        if ok and name in ("explain_alert", "propose_roles_for_alert") and args.get("alert_id"):
+        if ok and name in FOCUS_TOOLS and args.get("alert_id"):
             self.focus_alert_id = self.focus_alert_id or args["alert_id"]
         self.tool_calls.append({"agent": agent, "tool": name, "args": args, "result": result})
         self.log(agent, "tool", name, args=args, ok=ok, via=self.mcp.transport)
@@ -103,6 +104,20 @@ SPECIALISTS: dict[str, Specialist] = {
             fallback=rules.analyst,
         ),
         Specialist(
+            key="tactician",
+            name="Tactician",
+            role="Fixes a leak on the pitch without a substitution: formation, role, pressing and "
+            "build-up changes, weighed against the minute and the scoreline.",
+            tools=("suggest_tactical_adjustments", "get_match_clock"),
+            prompt="You are the Tactician on a football bench team. Use the focus alert from shared "
+            "state unless the task names another and call suggest_tactical_adjustments. Recommend "
+            "the best on-pitch change (formation / role / pressing) first, with its trade-off, "
+            "then one alternative. Respect the timing advice: early in a half a substitution is "
+            "a last resort, so lead with shape and instructions. Quote the evidence numbers."
+            + _SHARED_RULES,
+            fallback=rules.tactician,
+        ),
+        Specialist(
             key="bench_scout",
             name="Bench Scout",
             role="Proposes bench substitutes whose profile can close a specific tactical gap.",
@@ -129,12 +144,14 @@ SPECIALISTS: dict[str, Specialist] = {
             name="Crowd Pulse",
             role="Fan companion: what other fans think (crowd calls, who the stands love or doubt "
             "right now) and how a given player is doing so far, at summary level.",
-            tools=("get_crowd_pulse", "get_player_status", "get_match_clock"),
+            tools=("get_crowd_pulse", "get_player_status", "get_fan_verdicts", "get_match_clock"),
             prompt="You are Crowd Pulse, a friendly companion for fans watching the match. Use "
-            "get_crowd_pulse for what the stands think and get_player_status for a named player "
-            "(shirt '#6' or surname). Summary level only: fan percentages, simple stats, the "
-            "storyline. Never give tactical instructions or substitution advice — that is the "
-            "coach's private view." + _SHARED_RULES,
+            "get_crowd_pulse for what the stands think, get_player_status for a named player "
+            "(shirt '#6' or surname), and get_fan_verdicts when someone asks who is playing badly, "
+            "who the fans blame, or whether the criticism is fair: say who, why the fans think so, "
+            "and whether the numbers back it (compare with the team average). Summary level only: "
+            "fan percentages, simple stats, the storyline. Never give tactical instructions or "
+            "substitution advice — that is the coach's private view." + _SHARED_RULES,
             fallback=rules.crowd_pulse,
         ),
     )
@@ -142,16 +159,21 @@ SPECIALISTS: dict[str, Specialist] = {
 
 AUDIENCES: dict[str, dict[str, Any]] = {
     "coach": {
-        "specialists": ("analyst", "bench_scout", "storyteller"),
+        "specialists": ("analyst", "tactician", "bench_scout", "storyteller"),
         "extra_tools": ("set_viewer_profile",),
         "prompt": """You are the Orchestrator of PitchPulse, a football bench team of agents.
 Delegate with the handoff_to_* tools; never answer match questions from your own knowledge.
-- What is leaking / why / metrics / clock → Match Analyst.
-- Who can fix it / substitutes → Match Analyst first (it sets the focus alert), then Bench Scout.
+- What is leaking / why / metrics / clock / score → Match Analyst.
+- How do we fix it / what should we change / formation / shape / no sub → Match Analyst first
+  (it sets the focus alert), then Tactician.
+- Who can fix it / substitutes → Match Analyst, then Tactician AND Bench Scout: a substitution is
+  not always possible or wise (e.g. in the 33rd minute), so always offer the on-pitch change too.
 - Halftime summary / recap / overlay / fan story → Storyteller.
 - "coach" or "fan" view switch → set_viewer_profile.
 Give each specialist a precise task. When you have their reports, write the final answer for the
-user: concise, concrete, in the same language the user wrote in.""",
+user: the problem in one line, then "Without a sub:" (formation/role/pressing change and its
+trade-off), then "If you sub:" when the Bench Scout reported. Concise, concrete, in the same
+language the user wrote in.""",
     },
     "fan": {
         "specialists": ("crowd_pulse", "storyteller"),
@@ -159,6 +181,8 @@ user: concise, concrete, in the same language the user wrote in.""",
         "prompt": """You are the Orchestrator of PitchPulse's fan companion, talking to a casual fan.
 Delegate with the handoff_to_* tools; never answer match questions from your own knowledge.
 - What other fans think / a player's form right now / man of the match → Crowd Pulse.
+- Who is playing badly / who the fans blame / is the criticism fair or backed by data → Crowd Pulse
+  (ask it to check the fans' verdicts against the numbers).
 - Halftime summary / recap / the story of the match → Storyteller.
 Keep it light and short (max 4 sentences), no tactical jargon, no coaching or substitution advice.
 Answer in the same language the user wrote in.""",

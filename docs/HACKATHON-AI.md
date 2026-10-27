@@ -50,11 +50,14 @@ See [EXPLAIN.md](EXPLAIN.md) and [API.md](API.md).
 | --- | --- | --- |
 | **Orchestrator** | Routes the question with `handoff_to_*` tools, writes the final answer in the user's language | handoffs, `set_viewer_profile` |
 | **Match Analyst** | What is leaking and why it matters now; sets the focus alert | `get_match_clock`, `get_match_state`, `list_alerts`, `explain_alert` |
+| **Tactician** | Fixes the leak on the pitch without a substitution — formation, role, pressing, build-up — weighed against the minute and the scoreline | `suggest_tactical_adjustments`, `get_match_clock` |
 | **Bench Scout** | Substitutes whose profile closes the focus gap | `propose_roles_for_alert`, `list_alerts` |
 | **Storyteller** | Fan halftime summary, recap, overlay copy (any language) | `get_fan_halftime`, `generate_match_recap`, `get_overlay_packet` |
-| **Crowd Pulse** (fan team) | What other fans think, how a player is doing — summary level | `get_crowd_pulse`, `get_player_status`, `get_match_clock` |
+| **Crowd Pulse** (fan team) | What other fans think, how a player is doing, and whether the fans' criticism is backed by the numbers — summary level | `get_crowd_pulse`, `get_player_status`, `get_fan_verdicts`, `get_match_clock` |
 
-Two audiences share the agents: the **coach team** (Analyst, Bench Scout, Storyteller) and the **fan team** (Crowd Pulse, Storyteller; `"audience": "fan"`), which can't reach coach-only tools. All tool calls go through the [MCP server](MCP.md).
+A substitution in the 33rd minute is a big call, so a "who can fix it?" question gets both the Tactician's on-pitch change and the Bench Scout's shortlist; "without a sub" skips the Scout.
+
+Two audiences share the agents: the **coach team** (Analyst, Tactician, Bench Scout, Storyteller) and the **fan team** (Crowd Pulse, Storyteller; `"audience": "fan"`), which can't reach coach-only tools. All tool calls go through the [MCP server](MCP.md).
 
 - **Shared state** — a per-request blackboard holds the focus alert and each agent's report; every specialist sees teammates' findings in its prompt.
 - **Function calling** — each agent is an Azure OpenAI tool loop (`chat_with_tools`) limited to its own tools.

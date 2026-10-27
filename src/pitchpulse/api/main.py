@@ -18,6 +18,7 @@ from pitchpulse.api.replay_session import SESSION, ReplayStatus
 from pitchpulse.api.studio_state import STUDIO
 from pitchpulse.config import load_dotenv
 from pitchpulse.data.paths import match_dir
+from pitchpulse.data.score import score_at
 from pitchpulse.explain.azure_client import azure_configured
 from pitchpulse.explain.service import EXPLAIN
 from pitchpulse.mcp import server as mcp_server
@@ -38,6 +39,7 @@ def _status_dict(st: ReplayStatus) -> dict[str, Any]:
         "t_ms": st.t_ms,
         "match_minute": st.match_minute,
         "active_alert_ids": st.active_alert_ids,
+        "score": score_at(st.match_id, st.match_minute),
         "viewer": STUDIO.viewer.to_dict(),
         "azure_configured": azure_configured(),
     }
@@ -338,7 +340,9 @@ def _enrich_sse_message(msg: dict[str, Any]) -> dict[str, Any]:
 
 async def _sse_generator():
     """Stream replay messages while session is running."""
-    yield f"data: {json.dumps({'type': 'connected', 'payload': _status_dict(SESSION.status())})}\n\n"
+    st = SESSION.status()
+    yield f"data: {json.dumps({'type': 'connected', 'payload': _status_dict(st)})}\n\n"
+    goals_seen = len(score_at(st.match_id, st.match_minute)["goals"])
 
     while True:
         messages, sleep_s, _has_more = SESSION.next_messages()
@@ -352,6 +356,15 @@ async def _sse_generator():
         for msg in messages:
             enriched = _enrich_sse_message(msg)
             yield f"data: {json.dumps(enriched, separators=(',', ':'))}\n\n"
+            if msg.get("type") != "event":
+                continue
+            # Scoreboard follows the clock: push a goal as soon as the replay passes its minute.
+            ev = msg["payload"]
+            score = score_at(ev.get("match_id"), (ev.get("t_ms") or 0) / 60_000.0)
+            if len(score["goals"]) > goals_seen:
+                goals_seen = len(score["goals"])
+                goal = {"type": "goal", "payload": {"score": score, "goal": score["last_goal"]}}
+                yield f"data: {json.dumps(goal, separators=(',', ':'))}\n\n"
 
         if sleep_s > 0:
             await asyncio.sleep(sleep_s)
