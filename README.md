@@ -95,7 +95,7 @@ curl -s -X POST http://localhost:8011/agent/chat \
   -d '{"message":"Show halftime summary"}'
 ```
 
-More detail: [MCP](docs/MCP.md) · [DATASET](docs/DATASET.md) · [INTERPRET](docs/INTERPRET.md) · [API](docs/API.md) · [EXPLAIN](docs/EXPLAIN.md) · [STUDIO](docs/STUDIO.md) · [HACKATHON-AI](docs/HACKATHON-AI.md)
+More detail: [MCP](docs/MCP.md) · [DATASET](docs/DATASET.md) · [INTERPRET](docs/INTERPRET.md) · [API](docs/API.md) · [EXPLAIN](docs/EXPLAIN.md) · [STUDIO](docs/STUDIO.md)
 
 ---
 
